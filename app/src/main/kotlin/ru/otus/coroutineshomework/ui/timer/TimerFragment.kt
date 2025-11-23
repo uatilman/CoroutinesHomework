@@ -15,11 +15,15 @@ import java.util.Locale
 import kotlin.properties.Delegates
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 class TimerFragment : Fragment() {
 
     private var _binding: FragmentTimerBinding? = null
     private val binding get() = _binding!!
+
+    private var timerJob: Job? = null
 
     private var time: Duration by Delegates.observable(Duration.ZERO) { _, _, newValue ->
         binding.time.text = newValue.toDisplayString()
@@ -75,11 +79,17 @@ class TimerFragment : Fragment() {
     }
 
     private fun startTimer() {
-        // TODO: Start timer
+        timerJob = lifecycleScope.launch {
+            while (isActive) {
+                delay(TIMER_DELAY_MS) // Обновление примерно 60 раз в секунду (~16.67 мс)
+                time += timerDelayMs
+            }
+        }
     }
 
     private fun stopTimer() {
-        // TODO: Stop timer
+        timerJob?.cancel()
+        timerJob = null
     }
 
     override fun onDestroyView() {
@@ -91,12 +101,19 @@ class TimerFragment : Fragment() {
         private const val TIME = "time"
         private const val STARTED = "started"
 
+        private const val TIMER_DELAY_MS = 16L
+
+        private val timerDelayMs = TIMER_DELAY_MS.milliseconds
+
+        private val secondInMinute = 1.minutes.inWholeSeconds
+        private val millisecondInSecond = 1.seconds.inWholeMilliseconds
+
         private fun Duration.toDisplayString(): String = String.format(
             Locale.getDefault(),
             "%02d:%02d.%03d",
-            this.inWholeMinutes.toInt(),
-            this.inWholeSeconds.toInt(),
-            this.inWholeMilliseconds.toInt()
+            inWholeMinutes.toInt(),
+            (inWholeSeconds % secondInMinute).toInt(),
+            (inWholeMilliseconds % millisecondInSecond).toInt()
         )
     }
 }
