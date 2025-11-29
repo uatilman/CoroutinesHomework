@@ -12,6 +12,8 @@ import ru.otus.coroutineshomework.ui.login.data.Credentials
 
 class LoginViewModel : ViewModel() {
 
+    private val loginApi = LoginApi()
+
     private val _stateFlow = MutableStateFlow<LoginViewState>(LoginViewState.Login())
     val state = _stateFlow.asStateFlow()
 
@@ -38,7 +40,7 @@ class LoginViewModel : ViewModel() {
     private fun loginFlow(name: String, password: String): Flow<LoginViewState> = flow {
         emit(LoginViewState.LoggingIn)
         runCatching {
-            val user = LoginApi().login(Credentials(name, password))
+            val user = loginApi.login(Credentials(name, password))
             emit(LoginViewState.Content(user))
         }.onFailure {
             emit(LoginViewState.Login(it as? Exception))
@@ -48,7 +50,7 @@ class LoginViewModel : ViewModel() {
     private fun logoutFlow(): Flow<LoginViewState> = flow {
         emit(LoginViewState.LoggingOut)
         runCatching {
-            LoginApi().logout()
+            loginApi.logout()
             emit(LoginViewState.Login())
         }.onFailure {
             emit(LoginViewState.Login(it as? Exception))
