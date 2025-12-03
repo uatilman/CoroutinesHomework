@@ -8,6 +8,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import ru.otus.coroutineshomework.databinding.ContentBinding
@@ -15,6 +16,7 @@ import ru.otus.coroutineshomework.databinding.FragmentLoginBinding
 import ru.otus.coroutineshomework.databinding.LoadingBinding
 import ru.otus.coroutineshomework.databinding.LoginBinding
 
+@AndroidEntryPoint
 class LoginFragment : Fragment() {
 
     private var _binding: FragmentLoginBinding? = null

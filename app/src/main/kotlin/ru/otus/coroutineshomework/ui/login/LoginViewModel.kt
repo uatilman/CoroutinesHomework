@@ -2,6 +2,8 @@ package ru.otus.coroutineshomework.ui.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,9 +12,8 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import ru.otus.coroutineshomework.ui.login.data.Credentials
 
-class LoginViewModel : ViewModel() {
-
-    private val loginApi = LoginApi()
+@HiltViewModel
+class LoginViewModel @Inject constructor(private val loginApi: LoginApi) : ViewModel() {
 
     private val _stateFlow = MutableStateFlow<LoginViewState>(LoginViewState.Login())
     val state = _stateFlow.asStateFlow()
