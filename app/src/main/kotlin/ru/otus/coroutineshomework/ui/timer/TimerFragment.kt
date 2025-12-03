@@ -1,15 +1,16 @@
 package ru.otus.coroutineshomework.ui.timer
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
+import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 import ru.otus.coroutineshomework.databinding.FragmentTimerBinding
 import java.util.Locale
@@ -24,7 +25,8 @@ class TimerFragment : Fragment() {
     private var _binding: FragmentTimerBinding? = null
     private val binding get() = _binding!!
 
-    private val timerViewModel by viewModels<TimerViewModel>()
+    @set:Inject
+    lateinit var timerUseCase: TimerUseCase
 
 
     private var started by Delegates.observable(false) { _, _, newValue ->
@@ -54,11 +56,15 @@ class TimerFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        savedInstanceState?.let {
+            started = it.getBoolean(STARTED)
+        }
         setButtonsState(started)
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                timerViewModel.timeFlow.collect { time ->
+                timerUseCase.timeFlow.collect { time ->
+                    Log.d("TimerFragment", "Time updated: ${time.toDisplayString()}")
                     binding.time.text = time.toDisplayString()
                 }
             }
@@ -74,12 +80,17 @@ class TimerFragment : Fragment() {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(STARTED, started)
+    }
+
     private fun startTimer() {
-        timerViewModel.startTimer()
+        timerUseCase.startTimer()
     }
 
     private fun stopTimer() {
-        timerViewModel.stopTimer()
+        timerUseCase.stopTimer()
     }
 
     override fun onDestroyView() {
@@ -88,7 +99,7 @@ class TimerFragment : Fragment() {
     }
 
     companion object {
-
+        private const val STARTED = "started"
         private val secondInMinute = 1.minutes.inWholeSeconds
         private val millisecondInSecond = 1.seconds.inWholeMilliseconds
 
